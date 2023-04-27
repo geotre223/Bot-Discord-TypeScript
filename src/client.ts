@@ -1,49 +1,54 @@
-import fs from "node:fs";
-import path from "node:path";
+import type { Command } from "#/utils/command";
 import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
-import token from "./configs/guild"
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
+import { env } from "#/utils/env";
 
+// Create client instance:
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-client.commands = new Collection();
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+// Load commands:
+export const commands = new Collection<string, Command>();
 
-for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
-		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
-		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-		}
-	}
-}
+void (async() => {
+  const foldersPath = join(__dirname, "commands");
+  const commandFolders = readdirSync(foldersPath);
+
+  for (const folder of commandFolders) {
+    const commandsPath = join(foldersPath, folder);
+    const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith(".ts"));
+
+    for (const file of commandFiles) {
+      const filePath = join(commandsPath, file);
+      const command = await import(filePath) as Command;
+
+      commands.set(command.data.name, command);
+    }
+  }
+})();
 
 client.once(Events.ClientReady, () => {
-	console.log('Ready!');
+  console.log("Ready!");
 });
 
 client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
-	const command = client.commands.get(interaction.commandName);
+  const command = commands.get(interaction.commandName);
 
-	if (!command) return;
+  if (!command) return;
 
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
-	}
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ content: "There was an error while executing this command!", ephemeral: true });
+    } else {
+      await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
+    }
+  }
 });
 
-client.login(token);
+void client.login(env.botToken);
