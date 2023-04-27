@@ -1,17 +1,20 @@
 {
-  "devDependencies": {
-    "@swc-node/register": "^1.6.5",
-    "@types/node": "^18.16.1",
-    "typescript": "^5.0.4"
-  },
   "scripts": {
-    "dev": "node --watch -r @swc-node/register src/index.ts",
-    "build": "tsc --build",
-    "start": "node build/index.js"
+    "dev": "nodemon --exec node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
+    "start": "node -r @swc-node/register -r tsconfig-paths/register src/index.ts"
   },
   "main": "src/index.ts",
+  "devDependencies": {
+    "@bluzzi/eslint-config": "^1.1.0",
+    "@swc-node/register": "^1.6.5",
+    "@types/node": "^18.16.1",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.39.0",
+    "nodemon": "^2.0.22",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.0.4"
+  },
   "dependencies": {
-    "config.json": "^0.0.4",
     "discord.js": "^14.9.0"
   }
 }
