@@ -1,12 +1,10 @@
-import {CommandInteraction} from "discord.js";
+import type { ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
-const { SlashCommandBuilder } = require('discord.js');
+export const data = new SlashCommandBuilder()
+  .setName("ping")
+  .setDescription("Répond avec Pong !");
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('Répond avec Pong !'),
-    async execute(interaction: CommandInteraction) {
-        return interaction.reply('Pong !');
-    }
-};
+export function execute(interaction: ChatInputCommandInteraction): void {
+  void interaction.reply("Pong !");
+}
