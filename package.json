@@ -1,7 +1,9 @@
 {
   "scripts": {
     "dev": "nodemon --exec node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-    "start": "node -r @swc-node/register -r tsconfig-paths/register src/index.ts"
+    "start": "node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "main": "src/index.ts",
   "devDependencies": {
